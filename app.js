@@ -168,30 +168,38 @@
   // MODULE 1: AP FORENSIC AUDIT
   // =========================================================================
   function renderAPAuditResults(results) {
+    if (!results) return;
     state.apAuditData = results;
-    const { summary, exceptions, fullLedger } = results;
+    const summary = results.summary || results.kpis || {};
+    const exceptions = results.exceptions || {};
+    const fullLedger = results.fullLedger || [];
 
     // Update KPI cards
-    elements.kpiTotalSpend.textContent = formatINR(summary.totalSpend);
-    elements.kpiTotalVouchers.textContent = summary.totalVouchers.toLocaleString();
-    elements.kpiDuplicateExposure.textContent = formatINR(summary.duplicateExposure);
-    elements.kpiDuplicateCount.textContent = summary.duplicateCount;
-    elements.kpiTdsShortfall.textContent = formatINR(summary.totalTdsShortfall);
-    elements.kpiTdsCount.textContent = summary.tdsShortfallCount;
-    elements.kpiDisallowance30.textContent = formatINR(summary.totalDisallowance30);
-    elements.kpiInvalidGstCount.textContent = summary.invalidGstinCount;
-    elements.kpiInvalidGstExposure.textContent = Number(summary.invalidGstExposure).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+    elements.kpiTotalSpend.textContent = formatINR(summary.totalSpend || 0);
+    elements.kpiTotalVouchers.textContent = (summary.totalVouchers || 0).toLocaleString();
+    elements.kpiDuplicateExposure.textContent = formatINR(summary.duplicateExposure || 0);
+    elements.kpiDuplicateCount.textContent = summary.duplicateCount || 0;
+    elements.kpiTdsShortfall.textContent = formatINR(summary.totalTdsShortfall || 0);
+    elements.kpiTdsCount.textContent = summary.tdsShortfallCount || 0;
+    elements.kpiDisallowance30.textContent = formatINR(summary.totalDisallowance30 || 0);
+    elements.kpiInvalidGstCount.textContent = summary.invalidGstinCount || 0;
+    elements.kpiInvalidGstExposure.textContent = Number(summary.invalidGstExposure || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 });
 
     const cleanCount = fullLedger.filter(r => !r.is_duplicate && r.tds_shortfall === 0 && r.is_valid_gstin).length;
     elements.kpiCleanCount.textContent = cleanCount.toLocaleString();
-    const cleanPct = summary.totalVouchers > 0 ? ((cleanCount / summary.totalVouchers) * 100).toFixed(1) : 0;
+    const cleanPct = (summary.totalVouchers || 0) > 0 ? ((cleanCount / summary.totalVouchers) * 100).toFixed(1) : 0;
     elements.kpiCleanPct.textContent = `${cleanPct}%`;
 
     // Badges
-    elements.badgeVendorCount.textContent = exceptions.vendorSummary.length;
-    elements.badgeDuplicateCount.textContent = exceptions.duplicates.length;
-    elements.badgeTdsCount.textContent = exceptions.tdsShortfalls.length;
-    elements.badgeGstCount.textContent = exceptions.invalidGstins.length;
+    const vendorSummary = exceptions.vendorSummary || [];
+    const duplicates = exceptions.duplicates || [];
+    const tdsShortfalls = exceptions.tdsShortfalls || [];
+    const invalidGstins = exceptions.invalidGstins || [];
+
+    elements.badgeVendorCount.textContent = vendorSummary.length;
+    elements.badgeDuplicateCount.textContent = duplicates.length;
+    elements.badgeTdsCount.textContent = tdsShortfalls.length;
+    elements.badgeGstCount.textContent = invalidGstins.length;
     elements.badgeFullCount.textContent = fullLedger.length;
 
     // Render Sub-Tab 1: Vendor Summary
@@ -347,16 +355,19 @@
   // MODULE 2: YEAR-END CUT-OFF TESTING
   // =========================================================================
   function renderCutoffResults(cutoffRes) {
+    if (!cutoffRes) return;
     state.cutoffData = cutoffRes;
-    const { summary, exceptions, allVouchers } = cutoffRes;
+    const summary = cutoffRes.summary || cutoffRes.kpis || {};
+    const exceptions = cutoffRes.exceptions || [];
+    const allVouchers = cutoffRes.allVouchers || [];
 
-    elements.kpiCutoffTestedCount.textContent = summary.testedCount.toLocaleString();
-    elements.kpiCutoffTotalErrors.textContent = summary.totalErrors.toLocaleString();
-    elements.kpiCutoffTotalErrorAmount.textContent = Number(summary.totalErrorAmt).toLocaleString('en-IN', { minimumFractionDigits: 2 });
-    elements.kpiCutoffEarlyCount.textContent = summary.earlyCount.toLocaleString();
-    elements.kpiCutoffEarlyAmount.textContent = Number(summary.earlyAmt).toLocaleString('en-IN', { minimumFractionDigits: 2 });
-    elements.kpiCutoffLateCount.textContent = summary.lateCount.toLocaleString();
-    elements.kpiCutoffLateAmount.textContent = Number(summary.lateAmt).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+    elements.kpiCutoffTestedCount.textContent = (summary.testedCount || 0).toLocaleString();
+    elements.kpiCutoffTotalErrors.textContent = (summary.totalErrors || 0).toLocaleString();
+    elements.kpiCutoffTotalErrorAmount.textContent = Number(summary.totalErrorAmt || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+    elements.kpiCutoffEarlyCount.textContent = (summary.earlyCount || 0).toLocaleString();
+    elements.kpiCutoffEarlyAmount.textContent = Number(summary.earlyAmt || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+    elements.kpiCutoffLateCount.textContent = (summary.lateCount || 0).toLocaleString();
+    elements.kpiCutoffLateAmount.textContent = Number(summary.lateAmt || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 });
 
     elements.badgeCutoffExceptionsCount.textContent = exceptions.length;
     elements.badgeCutoffAllCount.textContent = allVouchers.length;
@@ -438,9 +449,12 @@
   // MODULE 3: SA 520 ANALYTICAL PROCEDURES & DUPONT ROE
   // =========================================================================
   function renderSA520Results(saResults) {
+    if (!saResults) return;
     state.sa520Data = saResults;
-    const { years, scorecard, summary } = saResults;
-    const latest = summary.latestYear;
+    const years = saResults.years || [];
+    const scorecard = saResults.scorecard || [];
+    const summary = saResults.summary || saResults.kpis || {};
+    const latest = summary.latestYear || (years.length > 0 ? years[years.length - 1] : null);
 
     if (!latest) return;
 

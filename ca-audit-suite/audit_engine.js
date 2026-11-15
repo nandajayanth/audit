@@ -274,22 +274,25 @@
     const totalCutoffExposure = cutoffErrors.reduce((sum, r) => sum + r.amount, 0);
     const totalInvalidGstExposure = invalidGstins.reduce((sum, r) => sum + r.gst_claimed, 0);
 
+    const kpisSummary = {
+      totalVouchers: cleanLedger.length,
+      totalSpend: Math.round(totalSpend * 100) / 100,
+      totalGstClaimed: Math.round(totalGstClaimed * 100) / 100,
+      totalTdsShortfall: Math.round(totalTdsShortfall * 100) / 100,
+      totalDisallowance30: Math.round(totalDisallowance30 * 100) / 100,
+      duplicateCount: duplicates.length,
+      duplicateExposure: Math.round(totalDuplicateExposure * 100) / 100,
+      tdsShortfallCount: tdsShortfalls.length,
+      invalidGstinCount: invalidGstins.length,
+      invalidGstExposure: Math.round(totalInvalidGstExposure * 100) / 100,
+      cutoffErrorCount: cutoffErrors.length,
+      cutoffExposure: Math.round(totalCutoffExposure * 100) / 100,
+      vendorCount: vendorSummary.length
+    };
+
     return {
-      kpis: {
-        totalVouchers: cleanLedger.length,
-        totalSpend: Math.round(totalSpend * 100) / 100,
-        totalGstClaimed: Math.round(totalGstClaimed * 100) / 100,
-        totalTdsShortfall: Math.round(totalTdsShortfall * 100) / 100,
-        totalDisallowance30: Math.round(totalDisallowance30 * 100) / 100,
-        duplicateCount: duplicates.length,
-        duplicateExposure: Math.round(totalDuplicateExposure * 100) / 100,
-        tdsShortfallCount: tdsShortfalls.length,
-        invalidGstinCount: invalidGstins.length,
-        invalidGstExposure: Math.round(totalInvalidGstExposure * 100) / 100,
-        cutoffErrorCount: cutoffErrors.length,
-        cutoffExposure: Math.round(totalCutoffExposure * 100) / 100,
-        vendorCount: vendorSummary.length
-      },
+      summary: kpisSummary,
+      kpis: kpisSummary,
       exceptions: {
         duplicates,
         tdsShortfalls,
@@ -370,17 +373,20 @@
 
     const exceptions = testedRows.filter(r => r.is_error);
 
+    const cutoffSummary = {
+      testedCount: testedRows.length,
+      totalErrors: totalErrors,
+      totalErrorAmt: Math.round(totalErrorAmt * 100) / 100,
+      earlyCount: earlyCount,
+      earlyAmt: Math.round(earlyAmt * 100) / 100,
+      lateCount: lateCount,
+      lateAmt: Math.round(lateAmt * 100) / 100,
+      yearEnd: yearEndDateStr
+    };
+
     return {
-      summary: {
-        testedCount: testedRows.length,
-        totalErrors: totalErrors,
-        totalErrorAmt: Math.round(totalErrorAmt * 100) / 100,
-        earlyCount: earlyCount,
-        earlyAmt: Math.round(earlyAmt * 100) / 100,
-        lateCount: lateCount,
-        lateAmt: Math.round(lateAmt * 100) / 100,
-        yearEnd: yearEndDateStr
-      },
+      summary: cutoffSummary,
+      kpis: cutoffSummary,
       exceptions: exceptions,
       allVouchers: testedRows
     };
