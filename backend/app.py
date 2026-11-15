@@ -62,6 +62,7 @@ class FinancialYearRecord(BaseModel):
     total_assets: Optional[float] = None
 
 @app.get("/")
+@app.get("/api/health")
 def health_check():
     return {
         "status": "online",

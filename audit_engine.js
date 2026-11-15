@@ -301,10 +301,96 @@
     };
   }
 
+  /**
+   * Dedicated Cut-off Boundary Audit Analyzer
+   */
+  function analyzeCutoffLedger(rawRows, yearEndDateStr = "2026-03-31") {
+    if (!Array.isArray(rawRows) || rawRows.length === 0) {
+      throw new Error("No ledger data provided for cut-off audit analysis.");
+    }
+    const yearEnd = new Date(yearEndDateStr + "T23:59:59");
+
+    let totalErrors = 0;
+    let totalErrorAmt = 0;
+    let earlyCount = 0;
+    let earlyAmt = 0;
+    let lateCount = 0;
+    let lateAmt = 0;
+
+    const testedRows = rawRows.map((r, i) => {
+      const voucherNo = r.voucher_no || r.voucher || `V-${1000 + i + 1}`;
+      const vendor = (r.vendor && String(r.vendor).trim()) ? String(r.vendor).trim() : "UNKNOWN_VENDOR";
+      const invoiceNo = r.invoice_no || r.invoice || `INV-${50000 + i + 1}`;
+      const amount = parseMoney(r.amount);
+      const invDateStr = r.invoice_date || "";
+      const grnDateStr = r.grn_date || "";
+
+      let cutoffStatus = "COMPLIANT";
+      let isEarly = false;
+      let isLate = false;
+
+      if (invDateStr && grnDateStr) {
+        const invDate = new Date(invDateStr + "T00:00:00");
+        const grnDate = new Date(grnDateStr + "T00:00:00");
+
+        if (!isNaN(invDate) && !isNaN(grnDate)) {
+          if (invDate <= yearEnd && grnDate > yearEnd) {
+            cutoffStatus = "ERROR: Early Booking (Goods arrived after year-end)";
+            isEarly = true;
+          } else if (invDate > yearEnd && grnDate <= yearEnd) {
+            cutoffStatus = "ERROR: Late Booking (Goods arrived before year-end)";
+            isLate = true;
+          }
+        }
+      }
+
+      if (isEarly) {
+        earlyCount++;
+        earlyAmt += amount;
+        totalErrors++;
+        totalErrorAmt += amount;
+      } else if (isLate) {
+        lateCount++;
+        lateAmt += amount;
+        totalErrors++;
+        totalErrorAmt += amount;
+      }
+
+      return {
+        voucher_no: voucherNo,
+        vendor: vendor,
+        invoice_no: invoiceNo,
+        invoice_date: invDateStr,
+        grn_date: grnDateStr,
+        amount: amount,
+        cutoff_status: cutoffStatus,
+        is_error: isEarly || isLate
+      };
+    });
+
+    const exceptions = testedRows.filter(r => r.is_error);
+
+    return {
+      summary: {
+        testedCount: testedRows.length,
+        totalErrors: totalErrors,
+        totalErrorAmt: Math.round(totalErrorAmt * 100) / 100,
+        earlyCount: earlyCount,
+        earlyAmt: Math.round(earlyAmt * 100) / 100,
+        lateCount: lateCount,
+        lateAmt: Math.round(lateAmt * 100) / 100,
+        yearEnd: yearEndDateStr
+      },
+      exceptions: exceptions,
+      allVouchers: testedRows
+    };
+  }
+
   // Export to global scope
   window.APAuditEngine = {
     generateMockLedger,
     analyzeAPLedger,
+    analyzeCutoffLedger,
     parseMoney,
     vendors
   };

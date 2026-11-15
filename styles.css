@@ -996,8 +996,191 @@ body {
 .toast.error { border-left: 4px solid var(--accent-rose); }
 .toast.info { border-left: 4px solid var(--accent-blue); }
 
+/* Executive Navy Blue Theme Overrides */
+:root {
+  --executive-navy: #1F4E78;
+  --executive-navy-dark: #112d46;
+  --executive-navy-light: #2c6ca5;
+  --executive-accent: #D2E3F4;
+}
+
+.navbar {
+  background: linear-gradient(135deg, #1F4E78 0%, #112d46 100%) !important;
+  border-bottom: 2px solid #2b5f8f !important;
+}
+
+.brand-icon {
+  background: #ffffff !important;
+  color: #1F4E78 !important;
+}
+
+.nav-links {
+  background: rgba(15, 23, 42, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.nav-btn.active {
+  background: #2563eb !important;
+  color: #ffffff !important;
+}
+
+/* App Layout & Sidebar */
+.app-layout {
+  display: flex;
+  max-width: 1750px;
+  margin: 0 auto;
+  width: 100%;
+  flex: 1;
+}
+
+.sidebar {
+  width: 320px;
+  min-width: 290px;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+  padding: 1.5rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sidebar-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.5rem;
+}
+
+.sidebar-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.sidebar-downloads {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.download-link-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.6rem 0.8rem;
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 0.8rem;
+  transition: var(--transition);
+}
+
+.download-link-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--accent-blue);
+  transform: translateX(3px);
+}
+
+.download-link-btn strong {
+  display: block;
+  font-size: 0.8rem;
+  color: #38bdf8;
+}
+
+.download-link-btn small {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.download-link-btn .dl-arrow {
+  color: var(--accent-emerald);
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.statutory-rule-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-left: 3px solid #1F4E78;
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+.statutory-rule-card strong {
+  display: block;
+  color: var(--text-primary);
+  margin-bottom: 0.2rem;
+}
+
+.statutory-rule-card p {
+  color: var(--text-secondary);
+  line-height: 1.35;
+  margin: 0;
+}
+
+.statutory-rule-card code {
+  background: var(--bg-input);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  color: var(--accent-cyan);
+}
+
+.main-content {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+.module-header-banner {
+  background: linear-gradient(135deg, rgba(31, 78, 120, 0.25) 0%, rgba(17, 45, 70, 0.35) 100%);
+  border: 1px solid rgba(31, 78, 120, 0.5);
+  border-left: 5px solid #1F4E78;
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.module-header-banner h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.module-header-banner p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
 /* Responsive Media Queries */
 @media (max-width: 1024px) {
+  .app-layout {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+  }
   .charts-grid {
     grid-template-columns: 1fr;
   }

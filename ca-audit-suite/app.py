@@ -14,7 +14,7 @@ import plotly.graph_objects as go
 import streamlit as st
 import requests
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 # Bound internal service URL (injected by Vercel Services via service bindings)
@@ -40,6 +40,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def find_static_file(filename: str):
+    curr_dir = os.path.dirname(os.path.abspath(__file__))
+    candidates = [
+        os.path.join(curr_dir, filename),
+        os.path.join(os.path.dirname(curr_dir), filename),
+        os.path.join(os.getcwd(), filename),
+        os.path.join(os.getcwd(), "ca-audit-suite", filename)
+    ]
+    for c in candidates:
+        if os.path.exists(c):
+            return c
+    return None
+
 @app.get("/api/health")
 def health():
     return {
@@ -50,37 +63,54 @@ def health():
 
 @app.get("/", response_class=HTMLResponse)
 def index():
-    return """<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>CA Forensic Audit Suite</title>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0F172A; color: #F8FAFC; margin: 0; padding: 2rem; }
-    .card { background: #1E293B; border-radius: 12px; padding: 2rem; max-width: 800px; margin: 2rem auto; border-top: 4px solid #1F4E78; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-    h1 { color: #FFFFFF; font-size: 1.8rem; margin-top: 0; }
-    p { color: #94A3B8; line-height: 1.6; }
-    .badge { display: inline-block; padding: 4px 12px; border-radius: 999px; background: #1F4E78; color: #fff; font-size: 0.8rem; font-weight: 600; }
-    ul { line-height: 1.8; color: #E2E8F0; }
-    code { background: #0F172A; padding: 2px 6px; border-radius: 4px; color: #38BDF8; font-size: 0.9em; }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <span class="badge">Vercel Service Active</span>
-    <h1>CA Forensic Audit and Financial Intelligence Suite</h1>
-    <p>Automated Accounts Payable Forensic Audit, Statutory Tax Compliance, Year-End Cut-Off Testing and SA 520 DuPont ROE Analytical Procedures.</p>
-    <hr style="border: 0; border-top: 1px solid #334155; margin: 1.5rem 0;" />
-    <h3>Available Service Endpoints:</h3>
-    <ul>
-      <li><code>GET /api/health</code> - Service Health and Internal Backend Binding Status</li>
-      <li><code>POST /api/audit/ap</code> - Run AP Forensic Audit Pipeline</li>
-      <li><code>POST /api/audit/cutoff</code> - Run Year-End Cut-Off Boundary Audit</li>
-      <li><code>POST /api/audit/screener</code> - Run 10-Year SA 520 DuPont ROE Audit</li>
-    </ul>
-  </div>
-</body>
-</html>"""
+    idx_path = find_static_file("index.html")
+    if idx_path and os.path.exists(idx_path):
+        with open(idx_path, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read(), status_code=200)
+    return HTMLResponse("<h1>CA Forensic Audit Suite</h1><p>Application UI initialized. Index file not found.</p>", status_code=404)
+
+@app.get("/styles.css")
+def get_styles():
+    p = find_static_file("styles.css")
+    if p:
+        return FileResponse(p, media_type="text/css")
+    raise HTTPException(status_code=404, detail="File not found")
+
+@app.get("/app.js")
+def get_app_js():
+    p = find_static_file("app.js")
+    if p:
+        return FileResponse(p, media_type="application/javascript")
+    raise HTTPException(status_code=404, detail="File not found")
+
+@app.get("/audit_engine.js")
+def get_audit_engine():
+    p = find_static_file("audit_engine.js")
+    if p:
+        return FileResponse(p, media_type="application/javascript")
+    raise HTTPException(status_code=404, detail="File not found")
+
+@app.get("/sa520_engine.js")
+def get_sa520_engine():
+    p = find_static_file("sa520_engine.js")
+    if p:
+        return FileResponse(p, media_type="application/javascript")
+    raise HTTPException(status_code=404, detail="File not found")
+
+@app.get("/export_service.js")
+def get_export_service():
+    p = find_static_file("export_service.js")
+    if p:
+        return FileResponse(p, media_type="application/javascript")
+    raise HTTPException(status_code=404, detail="File not found")
+
+@app.get("/sample_data/{filename}")
+def get_sample_file(filename: str):
+    p = find_static_file(os.path.join("sample_data", filename))
+    if p:
+        media_type = "text/csv" if filename.endswith(".csv") else "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        return FileResponse(p, media_type=media_type, filename=filename)
+    raise HTTPException(status_code=404, detail="Sample file not found")
 
 @app.post("/api/audit/ap")
 async def audit_ap(file: UploadFile = File(...)):
