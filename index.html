@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forensic Audit & SA 520 Intelligence Suite</title>
+  <!-- Modern Clean Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+  <!-- CDN Libraries: SheetJS (Excel read/write) & Chart.js (Data Visualizations) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <span>&Sigma;</span>
+        </div>
+        <div class="brand-text">
+          <h1>
+            AuditGenix
+            <span class="brand-badge">Forensic & SA 520</span>
+          </h1>
+          <p>Statutory Tax Compliance, AP Forensic Audit & DuPont Analytical Suite</p>
+        </div>
+      </div>
+
+      <div class="nav-links">
+        <button class="nav-btn active" data-target="module-ap">
+          <span>&para;</span> AP Forensic Audit
+        </button>
+        <button class="nav-btn" data-target="module-sa520">
+          <span>&Delta;</span> SA 520 & DuPont ROE
+        </button>
+        <button class="nav-btn" data-target="module-colab">
+          <span>&infin;</span> Colab Backend Bridge
+        </button>
+      </div>
+
+      <div class="nav-actions">
+        <div class="engine-pill" id="engineStatusPill" title="Click to configure backend API connection">
+          <span class="status-dot"></span>
+          <span id="engineStatusText">Browser Engine (Instant)</span>
+        </div>
+        <button class="icon-btn" id="themeToggleBtn" title="Toggle Light/Dark Theme">
+          &#9728;
+        </button>
+        <button class="btn btn-secondary btn-sm" id="openSettingsBtn">
+          &#9881; Settings
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Application Wrapper -->
+  <main class="main-wrapper">
+
+    <!-- ============================================================== -->
+    <!-- MODULE 1: AP LEDGER FORENSIC AUDIT & STATUTORY COMPLIANCE      -->
+    <!-- ============================================================== -->
+    <section id="module-ap" class="module-section active">
+
+      <!-- Action Toolbar -->
+      <div class="action-bar">
+        <div class="action-bar-left">
+          <button class="btn btn-primary" id="btnGenerateMockAP">
+            <span>&#9889;</span> Generate 500-Row ERP Ledger (Colab Seed 42)
+          </button>
+          <button class="btn btn-secondary" id="btnUploadAP">
+            <span>&#128194;</span> Upload ERP Ledger (CSV / Excel)
+          </button>
+          <div class="input-group">
+            <label for="cutoffDateInput">Fiscal Year-End:</label>
+            <input type="date" id="cutoffDateInput" value="2026-03-31">
+          </div>
+        </div>
+        <div class="action-bar-right">
+          <button class="btn btn-success" id="btnExportAPExcel">
+            <span>&#128229;</span> Export Master 6-Tab Workbook (.xlsx)
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI Ribbon Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card blue">
+          <div class="kpi-header">
+            <span class="kpi-title">Total Spend Analyzed</span>
+            <span class="kpi-icon">&#128179;</span>
+          </div>
+          <div class="kpi-value" id="kpiTotalSpend">&#8377;0.00</div>
+          <div class="kpi-subtext">
+            <span>Across <strong id="kpiTotalVouchers">0</strong> vouchers</span>
+          </div>
+        </div>
+
+        <div class="kpi-card rose">
+          <div class="kpi-header">
+            <span class="kpi-title">Double Payment Risk</span>
+            <span class="kpi-icon">&#9888;</span>
+          </div>
+          <div class="kpi-value" id="kpiDuplicateExposure">&#8377;0.00</div>
+          <div class="kpi-subtext">
+            <span class="highlight-danger"><strong id="kpiDuplicateCount">0</strong> duplicate invoices</span>
+          </div>
+        </div>
+
+        <div class="kpi-card amber">
+          <div class="kpi-header">
+            <span class="kpi-title">TDS Shortfall (194J/194C)</span>
+            <span class="kpi-icon">&#9878;</span>
+          </div>
+          <div class="kpi-value" id="kpiTdsShortfall">&#8377;0.00</div>
+          <div class="kpi-subtext">
+            <span class="highlight-warning"><strong id="kpiTdsCount">0</strong> vouchers below statutory TDS</span>
+          </div>
+        </div>
+
+        <div class="kpi-card purple">
+          <div class="kpi-header">
+            <span class="kpi-title">Sec 40(a)(ia) 30% Disallowance</span>
+            <span class="kpi-icon">&#128203;</span>
+          </div>
+          <div class="kpi-value" id="kpiDisallowance30">&#8377;0.00</div>
+          <div class="kpi-subtext">
+            <span>Tax expense addition risk</span>
+          </div>
+        </div>
+
+        <div class="kpi-card cyan">
+          <div class="kpi-header">
+            <span class="kpi-title">Invalid / Broken GSTINs</span>
+            <span class="kpi-icon">&#128196;</span>
+          </div>
+          <div class="kpi-value" id="kpiInvalidGstCount">0</div>
+          <div class="kpi-subtext">
+            <span class="highlight-danger">&#8377;<span id="kpiInvalidGstExposure">0.00</span> ITC at risk</span>
+          </div>
+        </div>
+
+        <div class="kpi-card emerald">
+          <div class="kpi-header">
+            <span class="kpi-title">Year-End Cut-Off Errors</span>
+            <span class="kpi-icon">&#128337;</span>
+          </div>
+          <div class="kpi-value" id="kpiCutoffCount">0</div>
+          <div class="kpi-subtext">
+            <span>&#8377;<span id="kpiCutoffExposure">0.00</span> crossed Mar 31</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Module Sub-Tabs Navigation -->
+      <div class="tabs-header">
+        <button class="tab-btn active" data-subtab="subtab-vendor-summary">
+          <span>1. Vendor Risk Matrix</span>
+          <span class="tab-badge" id="badgeVendorCount">0</span>
+        </button>
+        <button class="tab-btn" data-subtab="subtab-duplicates">
+          <span>2. Duplicate Invoices</span>
+          <span class="tab-badge badge-danger" id="badgeDuplicateCount">0</span>
+        </button>
+        <button class="tab-btn" data-subtab="subtab-tds">
+          <span>3. TDS Shortfalls & 40(a)(ia)</span>
+          <span class="tab-badge badge-danger" id="badgeTdsCount">0</span>
+        </button>
+        <button class="tab-btn" data-subtab="subtab-gstin">
+          <span>4. Invalid GSTINs (ITC Risk)</span>
+          <span class="tab-badge badge-danger" id="badgeGstCount">0</span>
+        </button>
+        <button class="tab-btn" data-subtab="subtab-cutoff">
+          <span>5. Cut-Off Violations</span>
+          <span class="tab-badge badge-danger" id="badgeCutoffCount">0</span>
+        </button>
+        <button class="tab-btn" data-subtab="subtab-full-ledger">
+          <span>6. Full Sanitized Ledger</span>
+          <span class="tab-badge" id="badgeFullCount">0</span>
+        </button>
+      </div>
+
+      <!-- Sub-Tab 1: Vendor Risk Summary -->
+      <div id="subtab-vendor-summary" class="subtab-content active">
+        <div class="card-panel">
+          <div class="card-panel-header">
+            <div>
+              <h3 class="card-panel-title">Vendor Exposure & Statutory Compliance Matrix</h3>
+              <p class="card-panel-desc">Aggregated by Vendor & GSTIN with total spend, TDS non-compliance, and Section 40(a)(ia) 30% disallowance liability.</p>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table" id="tableVendorSummary">
+              <thead>
+                <tr>
+                  <th>Vendor Name</th>
+                  <th>GSTIN</th>
+                  <th class="text-center">Vouchers</th>
+                  <th class="text-right">Total Spend</th>
+                  <th class="text-right">Total GST Claimed</th>
+                  <th class="text-right">TDS Shortfall</th>
+                  <th class="text-right">30% Disallowance</th>
+                  <th class="text-center">Risk Badge</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td colspan="8" class="text-center" style="padding: 2rem; color: var(--text-muted);">No data loaded. Click "Generate 500-Row ERP Ledger" to load.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-Tab 2: Duplicate Invoices -->
+      <div id="subtab-duplicates" class="subtab-content" style="display:none;">
+        <div class="card-panel">
+          <div class="card-panel-header">
+            <div>
+              <h3 class="card-panel-title">Duplicate Invoice Exceptions (Double-Payment Exposure)</h3>
+              <p class="card-panel-desc">Invoices with identical invoice numbers billed across different vouchers or colliding vendors.</p>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table" id="tableDuplicates">
+              <thead>
+                <tr>
+                  <th>Voucher No</th>
+                  <th>Invoice No</th>
+                  <th>Vendor</th>
+                  <th>GSTIN</th>
+                  <th>Invoice Date</th>
+                  <th>GRN Date</th>
+                  <th class="text-right">Amount</th>
+                  <th class="text-center">Risk Alert</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td colspan="8" class="text-center" style="padding: 2rem; color: var(--text-muted);">No duplicates detected.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-Tab 3: TDS Shortfalls -->
+      <div id="subtab-tds" class="subtab-content" style="display:none;">
+        <div class="card-panel">
+          <div class="card-panel-header">
+            <div>
+              <h3 class="card-panel-title">Statutory TDS Shortfalls & Sec 40(a)(ia) Disallowances</h3>
+              <p class="card-panel-desc">Evaluates 10% on Section 194J (Professional / Tech) and 2% on Section 194C (Contractor) on bills &gt; &#8377;30,000.</p>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table" id="tableTdsShortfalls">
+              <thead>
+                <tr>
+                  <th>Voucher No</th>
+                  <th>Vendor</th>
+                  <th>Section</th>
+                  <th class="text-right">Invoice Amount</th>
+                  <th class="text-center">TDS Rate</th>
+                  <th class="text-right">Expected TDS</th>
+                  <th class="text-right">Actual TDS Deducted</th>
+                  <th class="text-right">TDS Shortfall</th>
+                  <th class="text-right">30% Disallowance</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td colspan="9" class="text-center" style="padding: 2rem; color: var(--text-muted);">No TDS shortfalls found.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-Tab 4: Invalid GSTINs -->
+      <div id="subtab-gstin" class="subtab-content" style="display:none;">
+        <div class="card-panel">
+          <div class="card-panel-header">
+            <div>
+              <h3 class="card-panel-title">Structural GSTIN Validation (Input Tax Credit Risk)</h3>
+              <p class="card-panel-desc">Regex statutory validation: <code>^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$</code></p>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table" id="tableInvalidGst">
+              <thead>
+                <tr>
+                  <th>Voucher No</th>
+                  <th>Vendor</th>
+                  <th>Reported GSTIN</th>
+                  <th class="text-right">Invoice Amount</th>
+                  <th class="text-right">GST Claimed</th>
+                  <th>Diagnostic Failure Reason</th>
+                  <th class="text-center">ITC Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td colspan="7" class="text-center" style="padding: 2rem; color: var(--text-muted);">All vendor GSTINs compliant.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-Tab 5: Cut-off Violations -->
+      <div id="subtab-cutoff" class="subtab-content" style="display:none;">
+        <div class="card-panel">
+          <div class="card-panel-header">
+            <div>
+              <h3 class="card-panel-title">Year-End Cut-Off Testing (March 31 Fiscal Boundary)</h3>
+              <p class="card-panel-desc">Identifies Early Booking (invoice in March, goods received in April) and Late Booking (goods received in March, invoice delayed to April).</p>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table" id="tableCutoff">
+              <thead>
+                <tr>
+                  <th>Voucher No</th>
+                  <th>Vendor</th>
+                  <th>Invoice Date</th>
+                  <th>GRN Delivery Date</th>
+                  <th class="text-right">Voucher Amount</th>
+                  <th>Cut-Off Status & Diagnostic Exception</th>
+                  <th class="text-center">Audit Severity</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td colspan="7" class="text-center" style="padding: 2rem; color: var(--text-muted);">No cut-off errors detected.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-Tab 6: Full Cleaned Ledger -->
+      <div id="subtab-full-ledger" class="subtab-content" style="display:none;">
+        <div class="card-panel">
+          <div class="card-panel-header">
+            <div>
+              <h3 class="card-panel-title">Full Sanitized ERP Ledger</h3>
+              <p class="card-panel-desc">Complete ledger with sanitized numbers, compliant TDS benchmarks, and anomaly tagging.</p>
+            </div>
+            <div class="search-box">
+              <span>&#128269;</span>
+              <input type="text" id="ledgerSearchInput" placeholder="Filter by voucher, vendor, invoice...">
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table" id="tableFullLedger">
+              <thead>
+                <tr>
+                  <th>Voucher</th>
+                  <th>Vendor</th>
+                  <th>GSTIN</th>
+                  <th>Invoice No</th>
+                  <th>Inv Date</th>
+                  <th>GRN Date</th>
+                  <th>Sec</th>
+                  <th class="text-right">Amount</th>
+                  <th class="text-right">GST</th>
+                  <th class="text-right">TDS Ded.</th>
+                  <th class="text-right">Expected TDS</th>
+                  <th class="text-center">GST Valid</th>
+                  <th class="text-center">Cut-Off Status</th>
+                </tr>
+              </thead>
+              <tbody id="fullLedgerBody">
+                <tr><td colspan="13" class="text-center" style="padding: 2rem; color: var(--text-muted);">No ledger data.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-controls">
+            <span id="ledgerPaginationInfo" style="font-size: 0.8rem; color: var(--text-muted);">Showing 0 of 0 rows</span>
+            <div class="pagination-btn-group">
+              <button class="btn btn-secondary btn-sm" id="btnPrevPage">&laquo; Prev</button>
+              <button class="btn btn-secondary btn-sm" id="btnNextPage">Next &raquo;</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- MODULE 2: SA 520 ANALYTICAL PROCEDURES & DUPONT ROE ENGINE    -->
+    <!-- ============================================================== -->
+    <section id="module-sa520" class="module-section">
+
+      <!-- Action Toolbar -->
+      <div class="action-bar">
+        <div class="action-bar-left">
+          <button class="btn btn-primary" id="btnLoad3YrBaseline">
+            <span>&#128200;</span> Load 3-Year Baseline Sample
+          </button>
+          <button class="btn btn-secondary" id="btnLoadInfosys10Yr">
+            <span>&#127970;</span> Load 10-Year Infosys Real Screener Model
+          </button>
+          <button class="btn btn-secondary" id="btnUploadScreener">
+            <span>&#128194;</span> Upload Screener.in Excel (.xlsx)
+          </button>
+        </div>
+        <div class="action-bar-right">
+          <button class="btn btn-success" id="btnExportSA520Excel">
+            <span>&#128229;</span> Export SA 520 Scorecard (.xlsx)
+          </button>
+        </div>
+      </div>
+
+      <!-- DuPont 3-Stage Decomposition Breakdown Card -->
+      <div class="dupont-card">
+        <div class="dupont-header">
+          <h3 class="dupont-title">
+            <span>&#9889;</span>
+            DuPont 3-Way ROE Decomposition (Analytical Procedure)
+          </h3>
+          <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.25rem;">
+            Decomposes Return on Equity into Operating Profitability, Asset Efficiency, and Financial Leverage to isolate audit risk drivers.
+          </p>
+        </div>
+
+        <div class="dupont-equation-box">
+          Return on Equity (ROE) &nbsp;=&nbsp; (Net Profit / Sales) &nbsp;&times;&nbsp; (Sales / Total Assets) &nbsp;&times;&nbsp; (Total Assets / Equity)
+        </div>
+
+        <div class="dupont-stages-grid">
+          <div class="stage-card">
+            <div>
+              <span class="stage-badge">Stage 1 &bull; Operating Efficiency</span>
+              <h4 class="stage-title">Net Profit Margin</h4>
+              <div class="stage-value" id="dupontNetMargin">0.00%</div>
+            </div>
+            <p class="stage-desc">How much profit is generated per rupee of revenue.</p>
+          </div>
+
+          <div class="multiplier-symbol">&times;</div>
+
+          <div class="stage-card">
+            <div>
+              <span class="stage-badge">Stage 2 &bull; Asset Utilization</span>
+              <h4 class="stage-title">Asset Turnover</h4>
+              <div class="stage-value" id="dupontAssetTurnover">0.00x</div>
+            </div>
+            <p class="stage-desc">Efficiency of total asset deployment in generating revenue.</p>
+          </div>
+
+          <div class="multiplier-symbol">&times;</div>
+
+          <div class="stage-card">
+            <div>
+              <span class="stage-badge">Stage 3 &bull; Financial Leverage</span>
+              <h4 class="stage-title">Equity Multiplier</h4>
+              <div class="stage-value" id="dupontEquityMultiplier">0.00x</div>
+            </div>
+            <p class="stage-desc">Magnification factor: Total Assets / Shareholders Equity.</p>
+          </div>
+
+          <div class="multiplier-symbol">=</div>
+
+          <div class="stage-card" style="border-color: rgba(6, 182, 212, 0.4); background: rgba(6, 182, 212, 0.05);">
+            <div>
+              <span class="stage-badge" style="color: var(--accent-emerald);">Composite ROE</span>
+              <h4 class="stage-title" style="color: var(--text-primary);">DuPont ROE</h4>
+              <div class="stage-value" id="dupontCompositeRoe" style="color: var(--accent-emerald);">0.00%</div>
+            </div>
+            <p class="stage-desc">Audit benchmark for capital productivity.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SA 520 Interactive Analytical Charts -->
+      <div class="charts-grid">
+        <div class="chart-panel">
+          <div class="chart-panel-header">
+            <h4 class="chart-title">DuPont ROE & Driver Decomposition Trend</h4>
+            <span class="badge badge-info">Multi-Year</span>
+          </div>
+          <div class="chart-canvas-container">
+            <canvas id="chartDupont"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-panel">
+          <div class="chart-panel-header">
+            <h4 class="chart-title">Profitability Margins (EBIT Margin vs Net Margin)</h4>
+            <span class="badge badge-info">% of Revenue</span>
+          </div>
+          <div class="chart-canvas-container">
+            <canvas id="chartMargins"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-panel">
+          <div class="chart-panel-header">
+            <h4 class="chart-title">Working Capital Cycle & Collection Days (SA 520 Alert)</h4>
+            <span class="badge badge-warning">Debtor Days &gt; 75d Threshold</span>
+          </div>
+          <div class="chart-canvas-container">
+            <canvas id="chartWorkingCapital"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-panel">
+          <div class="chart-panel-header">
+            <h4 class="chart-title">Solvency & Liquidity Buffer (Current Ratio vs Debt/Equity)</h4>
+            <span class="badge badge-info">Capital Structure</span>
+          </div>
+          <div class="chart-canvas-container">
+            <canvas id="chartSolvency"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- SA 520 Automated Red-Flag Alerts Panel -->
+      <div class="card-panel">
+        <div class="card-panel-header">
+          <div>
+            <h3 class="card-panel-title">Automated SA 520 Red-Flag Risk Diagnostics</h3>
+            <p class="card-panel-desc">Threshold surveillance: Liquidity crunch (&lt; 1.33x MPBF), High leverage (&gt; 0.85x / 1.0x), Slow collections / Fictitious revenue (&gt; 60d / 75d), Weak coverage (&lt; 2.5x).</p>
+          </div>
+        </div>
+        <div class="alerts-grid" id="sa520AlertsGrid">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- Transposed 10-Year Ratio Scorecard (Audit Working Paper Format) -->
+      <div class="card-panel">
+        <div class="card-panel-header">
+          <div>
+            <h3 class="card-panel-title">10-Year Ratio Scorecard (Transposed Working Paper)</h3>
+            <p class="card-panel-desc">Years mapped as columns and financial/audit ratios mapped as rows, matching classic CA / CPA working paper layout.</p>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table class="data-table" id="tableRatioScorecard">
+            <thead id="scorecardHead">
+              <!-- Dynamically populated year columns -->
+            </thead>
+            <tbody id="scorecardBody">
+              <!-- Dynamically populated ratio rows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- MODULE 3: COLAB BACKEND CONNECTOR & ARCHITECTURE               -->
+    <!-- ============================================================== -->
+    <section id="module-colab" class="module-section">
+      <div class="card-panel">
+        <div class="card-panel-header">
+          <div>
+            <h3 class="card-panel-title">Google Colab Live Backend Connection</h3>
+            <p class="card-panel-desc">Connect this responsive frontend to your active Google Colab notebook instance via FastAPI and ngrok.</p>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+          <div>
+            <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.75rem;">1. Select Engine Execution Mode</h4>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; background: var(--bg-card); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); cursor: pointer;">
+                <input type="radio" name="engineMode" value="client" checked style="margin-top: 0.2rem;">
+                <div>
+                  <strong style="display: block; font-size: 0.85rem; color: var(--accent-emerald);">Browser Native Engine (Recommended)</strong>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">Runs 100% offline in your browser using pure JavaScript. Zero latency, instant calculations, Excel import/export without server setup.</span>
+                </div>
+              </label>
+
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; background: var(--bg-card); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); cursor: pointer;">
+                <input type="radio" name="engineMode" value="colab" style="margin-top: 0.2rem;">
+                <div>
+                  <strong style="display: block; font-size: 0.85rem; color: var(--accent-cyan);">Google Colab REST API Backend</strong>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">Routes calculations to the Python backend running inside Google Colab (FastAPI + pandas + openpyxl via ngrok tunnel).</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top: 1.25rem;">
+              <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.35rem;">Colab Backend Tunnel URL:</label>
+              <div style="display: flex; gap: 0.5rem;">
+                <input type="text" id="colabUrlInput" placeholder="https://xxxx-xx-xx.ngrok-free.app or http://localhost:8000" style="flex: 1; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 0.5rem 0.75rem; color: var(--text-primary); font-size: 0.85rem;">
+                <button class="btn btn-secondary btn-sm" id="btnTestColabPing">Ping API</button>
+              </div>
+              <span id="colabPingResult" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.35rem; display: block;">Status: Standalone Client Mode Active</span>
+            </div>
+          </div>
+
+          <div>
+            <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.5rem;">2. Colab Server Code Snippet (1-Click Run)</h4>
+            <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
+              Run this cell in your Colab notebook to start the FastAPI server and generate your ngrok URL:
+            </p>
+            <div class="code-box" id="colabCodeBox">!pip install fastapi uvicorn pyngrok nest-asyncio python-multipart openpyxl -q
+import nest_asyncio, uvicorn, threading
+from pyngrok import ngrok
+from backend.app import app
+
+# Paste your ngrok auth token if required
+# ngrok.set_auth_token("YOUR_TOKEN")
+
+nest_asyncio.apply()
+threading.Thread(target=lambda: uvicorn.run(app, host="127.0.0.1", port=8000), daemon=True).start()
+public_url = ngrok.connect(8000)
+print("Colab Backend LIVE at:", public_url)</div>
+            <button class="btn btn-primary btn-sm" id="btnCopyColabCode" style="margin-top: 0.5rem;">
+              <span>&#128203;</span> Copy Code to Clipboard
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal: File Upload (AP Ledger / Screener Excel) -->
+  <div class="modal-overlay" id="uploadModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="uploadModalTitle">Upload Dataset</h3>
+        <button class="icon-btn" id="btnCloseUploadModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="dropzone" id="fileDropzone">
+          <div class="dropzone-icon">&#128194;</div>
+          <div class="dropzone-text">Drag & drop your file here, or click to browse</div>
+          <div class="dropzone-hint">Supports .csv, .xlsx, .xls</div>
+          <input type="file" id="modalFileInput" style="display: none;" accept=".csv, .xlsx, .xls">
+        </div>
+        <div id="uploadFileInfo" style="margin-top: 1rem; display: none; background: var(--bg-card); padding: 0.75rem 1rem; border-radius: var(--radius-md);">
+          <strong id="uploadFileName" style="display: block; font-size: 0.85rem;"></strong>
+          <span id="uploadFileSize" style="font-size: 0.75rem; color: var(--text-muted);"></span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btnCancelUpload">Cancel</button>
+        <button class="btn btn-primary" id="btnConfirmUpload" disabled>Process & Analyze</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- JavaScript Engines & Application Entry Point -->
+  <script src="audit_engine.js"></script>
+  <script src="sa520_engine.js"></script>
+  <script src="export_service.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
