@@ -3,11 +3,13 @@
   "services": {
     "backend": {
       "root": "backend",
-      "framework": "fastapi"
+      "framework": "fastapi",
+      "entrypoint": "app.py"
     },
     "ca-audit-suite": {
       "root": "ca-audit-suite",
       "runtime": "python",
+      "entrypoint": "app.py",
       "bindings": [
         {
           "type": "service",
