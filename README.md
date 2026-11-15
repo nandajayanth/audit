@@ -60,6 +60,15 @@ npx serve .
 ```
 Then navigate to `http://localhost:3000`.
 
+### Option C: Streamlit Executive Audit Suite (Python)
+Launch the executive 3-tab Streamlit web application:
+```bash
+cd ca-audit-suite
+pip install -r requirements.txt
+streamlit run app.py
+```
+Then navigate to `http://localhost:8501`.
+
 ---
 
 ## 🔗 Connecting to Google Colab Backend
@@ -92,6 +101,11 @@ You can connect this frontend directly to your active Google Colab notebook inst
 ## 📁 Project Structure
 
 ```text
+├── ca-audit-suite/          # Streamlit Executive Forensic & Statutory Audit Suite
+│   ├── app.py               # Modern 3-tab executive UI (Navy #1F4E78 theme)
+│   ├── audit_engine.py      # Core audit logic extracted from audit_backend.ipynb
+│   ├── requirements.txt     # Python dependencies (streamlit, pandas, plotly, etc.)
+│   └── sample_data/         # Sample ERP AP ledger, Cut-off CSV, and Screener XLSX
 ├── index.html               # Responsive Single-Page Application (HTML5)
 ├── styles.css               # Corporate Dark/Light Theme & Responsive Design (CSS3)
 ├── app.js                   # Application State, Event Handlers & Chart.js Controllers
