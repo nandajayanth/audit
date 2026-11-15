@@ -1,0 +1,10 @@
+# Prevent Vercel from mistaking this project for a Python serverless backend
+backend/
+ca-audit-suite/
+__pycache__/
+*.pyc
+*.py
+*.ipynb
+notebook.json
+.git
+.gitignore
