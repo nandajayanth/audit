@@ -1,9 +1,29 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "version": 2,
-  "framework": null,
-  "buildCommand": null,
-  "outputDirectory": ".",
-  "cleanUrls": true,
-  "trailingSlash": false
+  "services": {
+    "backend": {
+      "root": "backend",
+      "framework": "fastapi"
+    },
+    "ca-audit-suite": {
+      "root": "ca-audit-suite",
+      "runtime": "python",
+      "bindings": [
+        {
+          "type": "service",
+          "service": "backend",
+          "format": "url",
+          "env": "BACKEND_URL"
+        }
+      ]
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "ca-audit-suite"
+      }
+    }
+  ]
 }

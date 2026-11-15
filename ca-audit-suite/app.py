@@ -11,6 +11,10 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import streamlit as st
+import requests
+
+# Bound internal service URL (injected by Vercel Services via service bindings)
+BACKEND_URL = os.environ.get("BACKEND_URL", "").strip().rstrip("/")
 
 # Import the core audit engine functions
 from audit_engine import run_ap_audit, run_cutoff_audit, run_screener_ratio_audit
@@ -211,6 +215,17 @@ with st.sidebar:
     """, unsafe_allow_html=True)
     
     st.info("💡 **Executive Audit Workbench**\n\nImplements real-time forensic ledger anomaly testing, Section 194C/J TDS audits, GSTIN verification, Year-End cut-off boundary checks, and 10-year SA 520 DuPont ROE analytics.")
+    
+    if BACKEND_URL:
+        try:
+            resp = requests.get(f"{BACKEND_URL}/", timeout=2)
+            if resp.status_code == 200:
+                backend_info = resp.json()
+                st.success(f"🔗 **Internal Service Connected**\n\n`backend` service bound at `{BACKEND_URL}` ({backend_info.get('status', 'online')})")
+            else:
+                st.info(f"🔗 **Internal Service Bound**: `{BACKEND_URL}`")
+        except Exception:
+            st.info(f"🔗 **Internal Service Bound**: `{BACKEND_URL}`")
     
     st.markdown("### 📥 Sample Test Files")
     st.markdown("Download realistic sample files to test all audit modules:")
